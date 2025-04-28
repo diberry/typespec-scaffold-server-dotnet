@@ -3,6 +3,8 @@
 #nullable enable
 
 using TypeSpec.Helpers;
+using System.Security.Authentication;
+using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +17,18 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 MockRegistration.Register(builder);
 
+// Configure Kestrel to listen on both IPv4 and IPv6
+if (builder.Environment.IsDevelopment())
+{
+    builder.WebHost.ConfigureKestrel(options =>
+    {
+        // Listen on IPv4 loopback
+        options.Listen(IPAddress.Parse("127.0.0.1"), 5471);
+        // Listen on IPv6 loopback
+        options.Listen(IPAddress.IPv6Loopback, 5471);
+    });
+}
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -23,6 +37,7 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
+    app.UseHttpsRedirection();
 }
 else
 {
@@ -35,8 +50,6 @@ else
     });
 }
 
-
-app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.Use(async (context, next) =>
 {
@@ -46,26 +59,30 @@ app.Use(async (context, next) =>
 
 app.MapGet("/openapi.yaml", async (HttpContext context) =>
 {
-    var externalFilePath = "/openapi.json"; // Full path to the file outside the project
-    if (!File.Exists(externalFilePath))
+    var projectFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "openapi.yaml");
+    
+    // First try in the server directory
+    if (!File.Exists(projectFilePath))
+    {
+        projectFilePath = Path.Combine(Directory.GetCurrentDirectory(), "openapi.yaml");
+    }
+    
+    if (!File.Exists(projectFilePath))
     {
         context.Response.StatusCode = StatusCodes.Status404NotFound;
         await context.Response.WriteAsync("OpenAPI spec not found.");
         return;
     }
-    context.Response.ContentType = "application/json";
-    await context.Response.SendFileAsync(externalFilePath);
+    
+    context.Response.ContentType = "application/yaml";
+    await context.Response.SendFileAsync(projectFilePath);
 });
 
-
 app.UseRouting();
-
 app.UseAuthorization();
-
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-
 
 app.Run();
