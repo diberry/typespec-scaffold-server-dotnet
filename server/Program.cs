@@ -3,10 +3,12 @@
 #nullable enable
 
 using TypeSpec.Helpers;
-using System.Security.Authentication;
-using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure the app to use HTTP instead of HTTPS when in Docker/Production
+// This fixes the certificate error
+builder.WebHost.UseUrls("http://*:80");
 
 // Add services to the container.
 builder.Services.AddControllersWithViews(options =>
@@ -17,18 +19,6 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 MockRegistration.Register(builder);
 
-// Configure Kestrel to listen on both IPv4 and IPv6
-if (builder.Environment.IsDevelopment())
-{
-    builder.WebHost.ConfigureKestrel(options =>
-    {
-        // Listen on IPv4 loopback
-        options.Listen(IPAddress.Parse("127.0.0.1"), 5471);
-        // Listen on IPv6 loopback
-        options.Listen(IPAddress.IPv6Loopback, 5471);
-    });
-}
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -37,7 +27,6 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
-    app.UseHttpsRedirection();
 }
 else
 {
@@ -46,9 +35,12 @@ else
     {
         c.DocumentTitle = "TypeSpec Generated OpenAPI Viewer";
         c.SwaggerEndpoint("/openapi.yaml", "TypeSpec Generated OpenAPI Docs");
-        c.RoutePrefix = string.Empty; // Set Swagger UI at the root
+        c.RoutePrefix = "swagger";
     });
 }
+
+// Disable HTTPS redirection - this prevents the certificate error
+// app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 app.Use(async (context, next) =>
@@ -59,30 +51,26 @@ app.Use(async (context, next) =>
 
 app.MapGet("/openapi.yaml", async (HttpContext context) =>
 {
-    var projectFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "openapi.yaml");
-    
-    // First try in the server directory
-    if (!File.Exists(projectFilePath))
-    {
-        projectFilePath = Path.Combine(Directory.GetCurrentDirectory(), "openapi.yaml");
-    }
-    
-    if (!File.Exists(projectFilePath))
+    var externalFilePath = "/openapi.json"; // Full path to the file outside the project
+    if (!File.Exists(externalFilePath))
     {
         context.Response.StatusCode = StatusCodes.Status404NotFound;
         await context.Response.WriteAsync("OpenAPI spec not found.");
         return;
     }
-    
-    context.Response.ContentType = "application/yaml";
-    await context.Response.SendFileAsync(projectFilePath);
+    context.Response.ContentType = "application/json";
+    await context.Response.SendFileAsync(externalFilePath);
 });
 
+
 app.UseRouting();
+
 app.UseAuthorization();
+
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
 
 app.Run();

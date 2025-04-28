@@ -3,7 +3,7 @@
     - "@typespec/http-server-csharp"
     options:
       "@typespec/openapi3":
-        emitter-output-dir: "{project-root}/../server"
+        emitter-output-dir: "{project-root}/../server/wwwroot"
       "@typespec/http-server-csharp":
         emitter-output-dir: "{project-root}/../server"
         use-swaggerui: true

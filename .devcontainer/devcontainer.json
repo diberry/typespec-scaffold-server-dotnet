@@ -29,7 +29,8 @@
 			"extensions": [
 				"ms-azuretools.azure-dev",
 				"typespec.typespec-vscode",
-				"ms-dotnettools.csdevkit"
+				"ms-dotnettools.csdevkit",
+				"ms-azuretools.vscode-docker"
 			]
 		}
 	}

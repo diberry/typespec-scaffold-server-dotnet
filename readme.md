@@ -8,3 +8,6 @@ Steps:
 1. Run compile script to get ./server and ./spec/openapi3/
 1. Change into generated ./server folder and run dotnet restore and dotnet run.
 1. Build succeeds so run the application with dotent run. 
+1. Create AZD infra with azd init
+1. Change container to max replicas of 1
+1. Deploy with azd up
