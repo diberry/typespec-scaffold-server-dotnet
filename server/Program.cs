@@ -59,18 +59,13 @@ app.Use(async (context, next) =>
 
 app.MapGet("/openapi.yaml", async (HttpContext context) =>
 {
-    var projectFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "openapi.yaml");
-    
-    // First try in the server directory
-    if (!File.Exists(projectFilePath))
-    {
-        projectFilePath = Path.Combine(Directory.GetCurrentDirectory(), "openapi.yaml");
-    }
+    var wwwrootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+    var projectFilePath = Path.Combine(wwwrootPath, "openapi.yaml");
     
     if (!File.Exists(projectFilePath))
     {
         context.Response.StatusCode = StatusCodes.Status404NotFound;
-        await context.Response.WriteAsync("OpenAPI spec not found.");
+        await context.Response.WriteAsync("OpenAPI spec not found in wwwroot folder.");
         return;
     }
     
