@@ -1,0 +1,17 @@
+    {
+      "name": "spec",
+      "version": "1.0.0",
+      "main": "index.js",
+      "scripts": {
+        "compile": "tsp compile . --config ./tspconfig.yaml"
+      },
+      "keywords": [],
+      "author": "",
+      "license": "ISC",
+      "description": "",
+      "dependencies": {
+        "@typespec/http": "^1.0.0-rc.1",
+        "@typespec/http-server-csharp": "^0.58.0-alpha.14",
+        "@typespec/openapi3": "^1.0.0-rc.1"
+      }
+    }
