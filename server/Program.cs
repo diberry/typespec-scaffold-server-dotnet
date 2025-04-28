@@ -6,10 +6,6 @@ using TypeSpec.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure the app to use HTTP instead of HTTPS when in Docker/Production
-// This fixes the certificate error
-builder.WebHost.UseUrls("http://*:80");
-
 // Add services to the container.
 builder.Services.AddControllersWithViews(options =>
 {
@@ -39,9 +35,8 @@ else
     });
 }
 
-// Disable HTTPS redirection - this prevents the certificate error
-// app.UseHttpsRedirection();
 
+app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.Use(async (context, next) =>
 {
