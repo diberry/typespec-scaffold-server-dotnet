@@ -46,7 +46,7 @@ else
     {
         c.DocumentTitle = "TypeSpec Generated OpenAPI Viewer";
         c.SwaggerEndpoint("/openapi.yaml", "TypeSpec Generated OpenAPI Docs");
-        c.RoutePrefix = "swagger";
+        c.RoutePrefix = string.Empty; // Set Swagger UI at the root
     });
 }
 
