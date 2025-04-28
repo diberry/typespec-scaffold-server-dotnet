@@ -31,7 +31,6 @@ msbuild.wrn
 **/.dotnet/
 **/.vs/
 **/.vscode/
-**/Properties/launchSettings.json
 artifacts/
 **/*.razor.g.cs
 **/*.razor.css.g.cs

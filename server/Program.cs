@@ -57,6 +57,9 @@ app.Use(async (context, next) =>
     await next();
 });
 
+// Add redirect from root URL to Swagger UI
+app.MapGet("/", () => Results.Redirect("/swagger"));
+
 app.MapGet("/openapi.yaml", async (HttpContext context) =>
 {
     var wwwrootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
