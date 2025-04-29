@@ -3,10 +3,9 @@
     - "@typespec/http-server-csharp"
     options:
       "@typespec/openapi3":
-        emitter-output-dir: "{project-root}/../server/wwwroot"
+        emitter-output-dir: "{project-root}/../server_inmem/wwwroot"
       "@typespec/http-server-csharp":
-        emitter-output-dir: "{project-root}/../server"
+        emitter-output-dir: "{project-root}/../server_inmem"
         use-swaggerui: true
-        openapi-path: "/openapi.json"
         overwrite: true
         emit-mocks: "mocks-and-project-files"

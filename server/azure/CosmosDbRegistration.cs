@@ -1,6 +1,5 @@
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Configuration;
-using Azure.Identity;
 using System;
 using System.Threading.Tasks;
 
@@ -26,6 +25,7 @@ namespace DemoService.Service
             // Get configuration settings
             var cosmosEndpoint = builder.Configuration["CosmosDb:Endpoint"];
             var cosmosDatabaseName = builder.Configuration["CosmosDb:DatabaseName"] ?? "WidgetDb";
+            var cosmosKey = builder.Configuration["CosmosDb:Key"];
             
             // Configure Cosmos DB client options
             var cosmosClientOptions = new CosmosClientOptions
@@ -39,22 +39,19 @@ namespace DemoService.Service
             
             builder.Services.AddSingleton(serviceProvider => 
             {
-                // For local development, use the Cosmos DB emulator if no endpoint is specified
-                if (string.IsNullOrEmpty(cosmosEndpoint) && builder.Environment.IsDevelopment())
-                {
-                    // Local emulator endpoint and key
-                    var emulatorEndpoint = "https://localhost:8081/";
-                    var emulatorKey = "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==";
-                    return new CosmosClient(emulatorEndpoint, emulatorKey, cosmosClientOptions);
-                }
-                
+                // Validate configuration
                 if (string.IsNullOrEmpty(cosmosEndpoint))
                 {
                     throw new ArgumentException("Cosmos DB Endpoint must be specified in configuration");
                 }
                 
-                // Use DefaultAzureCredential for authentication in production
-                return new CosmosClient(cosmosEndpoint, new DefaultAzureCredential(), cosmosClientOptions);
+                if (string.IsNullOrEmpty(cosmosKey))
+                {
+                    throw new ArgumentException("Cosmos DB Key must be specified in configuration");
+                }
+                
+                // Create Cosmos client with key-based authentication
+                return new CosmosClient(cosmosEndpoint, cosmosKey, cosmosClientOptions);
             });
 
             // Initialize Cosmos DB if needed
