@@ -5,6 +5,7 @@
 using TypeSpec.Helpers;
 using System.Security.Authentication;
 using System.Net;
+using DemoService.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,7 +16,10 @@ builder.Services.AddControllersWithViews(options =>
 });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-MockRegistration.Register(builder);
+
+// Register CosmosDB services and use WidgetsCosmos implementation instead of mocks
+// MockRegistration.Register(builder);
+CosmosDbRegistration.RegisterCosmosServices(builder);
 
 // Configure Kestrel to listen on both IPv4 and IPv6
 if (builder.Environment.IsDevelopment())
