@@ -9,9 +9,9 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["ServiceProject.csproj", "web/"]
-RUN dotnet restore "web/ServiceProject.csproj"
-WORKDIR "/src/web"
+COPY ["ServiceProject.csproj", "server/"]
+RUN dotnet restore "server/ServiceProject.csproj"
+WORKDIR "/src/server"
 COPY . .
 RUN dotnet build "./ServiceProject.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
