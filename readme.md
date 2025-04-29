@@ -10,7 +10,7 @@ Steps:
 1. Install Azure Cosmos client library
 
     ```
-    dotnet add package Microsoft.Azure.Cosmos
+    dotnet add package Microsoft.Azure.Cosmos --version 3.*
     ```
 
 1. Add key to local secrets
@@ -42,3 +42,50 @@ Steps:
 1. Create AZD infra with azd init
 1. Change container to max replicas of 1
 1. Deploy with azd up
+
+## Add managed identity 
+
+```
+dotnet add package Azure.Identity --version 1.12.*
+```
+
+login to azure cli
+
+```
+az login
+```
+
+* `dotnet user-secrets init`
+* `dotnet user-secrets set "CosmosDb:Endpoint" "<your-cosmos-db-endpoint-here>"`
+
+required RBAC permissions
+
+https://learn.microsoft.com/en-us/azure/cosmos-db/nosql/how-to-grant-control-plane-access?tabs=built-in-definition%2Ccsharp&pivots=azure-interface-cli
+
+```
+# User
+az ad signed-in-user show
+
+#Control plan
+az role definition list \
+    --name "Cosmos DB Operator"
+
+az group show \
+    --name "<name-of-existing-resource-group>"
+
+#Data plan
+az cosmosdb sql role definition list \
+    --resource-group "<name-of-existing-resource-group>" \
+    --account-name "<name-of-existing-nosql-account>"
+
+az cosmosdb show \
+    --resource-group "<name-of-existing-resource-group>" \
+    --name "<name-of-existing-nosql-account>" \
+    --query "{id:id}"
+
+az cosmosdb sql role assignment create --resource-group "<name-of-existing-resource-group>" --account-name "<name-of-existing-nosql-account>" --role-definition-id "<id-of-new-role-definition>" --principal-id "<id-of-existing-identity>" --scope "/subscriptions/aaaa0a0a-bb1b-cc2c-dd3d-eeeeee4e4e4e/resourceGroups/msdocs-identity-example/providers/Microsoft.DocumentDB/databaseAccounts/msdocs-identity-example-nosql"
+
+az cosmosdb sql role assignment list \
+    --resource-group "<name-of-existing-resource-group>" \
+    --account-name "<name-of-existing-nosql-account>"
+```
