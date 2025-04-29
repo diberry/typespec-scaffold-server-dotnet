@@ -9,5 +9,5 @@ services:
         host: containerapp
         language: dotnet
         docker:
-            path: ../Dockerfile
+            path: server/Dockerfile
             context: .
