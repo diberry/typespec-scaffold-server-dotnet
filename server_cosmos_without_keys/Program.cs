@@ -38,12 +38,13 @@ var app = builder.Build();
 app.UseExceptionHandler("/Home/Error");
 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
 app.UseHsts();
+
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.DocumentTitle = "TypeSpec Generated OpenAPI Viewer";
     c.SwaggerEndpoint("/openapi.yaml", "TypeSpec Generated OpenAPI Docs");
-    c.RoutePrefix = "swagger";
+    c.RoutePrefix = string.Empty; // Set Swagger UI at the app's root
 });
 
 app.UseStaticFiles();
@@ -67,8 +68,12 @@ app.MapGet("/openapi.yaml", async (HttpContext context) =>
 });
 
 app.UseRouting();
+
+app.MapGet("/", () => Results.Redirect("/swagger/index.html"));
+
 app.UseAuthorization();
 app.UseHttpsRedirection();
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
