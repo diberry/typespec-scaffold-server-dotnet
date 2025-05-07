@@ -24,8 +24,8 @@ namespace DemoService.Service
             builder.Services.AddScoped<TypeSpec.Helpers.IJsonSerializationProvider, TypeSpec.Helpers.JsonSerializationProvider>();
             
             // Get configuration settings
-            var cosmosEndpoint = builder.Configuration["CosmosDb:Endpoint"];
-            var cosmosDatabaseName = builder.Configuration["CosmosDb:DatabaseName"] ?? "WidgetDb";
+            var cosmosEndpoint = builder.Configuration["Configuration:AzureCosmosDb:Endpoint"];
+            var cosmosDatabaseName = builder.Configuration["Configuration:AzureCosmosDb:DatabaseName"] ?? "WidgetDb";
             
             // Configure Cosmos DB client options
             var cosmosClientOptions = new CosmosClientOptions
@@ -46,10 +46,11 @@ namespace DemoService.Service
                 }
                 
                 // Create chained credential with fallback options
-                var credential = new ChainedTokenCredential(
-                    new ManagedIdentityCredential(),
-                    new AzureCliCredential()
-                );
+                // var credential = new ChainedTokenCredential(
+                //     new ManagedIdentityCredential(),
+                //     new AzureCliCredential()
+                // );
+                var credential = new DefaultAzureCredential();
                 
                 // Create Cosmos client with token credential authentication
                 return new CosmosClient(cosmosEndpoint, credential, cosmosClientOptions);

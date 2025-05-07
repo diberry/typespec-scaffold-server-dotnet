@@ -89,3 +89,7 @@ az cosmosdb sql role assignment list \
     --resource-group "<name-of-existing-resource-group>" \
     --account-name "<name-of-existing-nosql-account>"
 ```
+
+## Related repos
+
+https://github.com/azure-samples/container-apps-dotnet-minimal-api
