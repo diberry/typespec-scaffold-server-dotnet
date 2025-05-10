@@ -3,6 +3,9 @@
 #nullable enable
 
 using TypeSpec.Helpers;
+using System.Security.Authentication;
+using System.Net;
+using DemoService.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,30 +16,36 @@ builder.Services.AddControllersWithViews(options =>
 });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-MockRegistration.Register(builder);
 
-var app = builder.Build();
+// Register CosmosDB services and use WidgetsCosmos implementation instead of mocks
+// MockRegistration.Register(builder);
+CosmosDbRegistration.RegisterCosmosServices(builder);
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+// Configure Kestrel to listen on both IPv4 and IPv6
+if (builder.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
-}
-else
-{
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
+    builder.WebHost.ConfigureKestrel(options =>
     {
-        c.DocumentTitle = "TypeSpec Generated OpenAPI Viewer";
-        c.SwaggerEndpoint("/openapi.yaml", "TypeSpec Generated OpenAPI Docs");
-        c.RoutePrefix = "swagger";
+        // Listen on IPv4 loopback
+        options.Listen(IPAddress.Parse("127.0.0.1"), 5471);
+        // Listen on IPv6 loopback
+        options.Listen(IPAddress.IPv6Loopback, 5471);
     });
 }
 
+var app = builder.Build();
 
-app.UseHttpsRedirection();
+app.UseExceptionHandler("/Home/Error");
+// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+app.UseHsts();
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.DocumentTitle = "TypeSpec Generated OpenAPI Viewer";
+    c.SwaggerEndpoint("/openapi.yaml", "TypeSpec Generated OpenAPI Docs");
+    c.RoutePrefix = "swagger";
+});
+
 app.UseStaticFiles();
 app.Use(async (context, next) =>
 {
@@ -46,7 +55,7 @@ app.Use(async (context, next) =>
 
 app.MapGet("/openapi.yaml", async (HttpContext context) =>
 {
-    var externalFilePath = "/openapi.json"; // Full path to the file outside the project
+    var externalFilePath = "wwwroot/openapi.yaml"; // Full path to the file outside the project
     if (!File.Exists(externalFilePath))
     {
         context.Response.StatusCode = StatusCodes.Status404NotFound;
@@ -57,15 +66,11 @@ app.MapGet("/openapi.yaml", async (HttpContext context) =>
     await context.Response.SendFileAsync(externalFilePath);
 });
 
-
 app.UseRouting();
-
 app.UseAuthorization();
-
-
+app.UseHttpsRedirection();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-
 
 app.Run();
